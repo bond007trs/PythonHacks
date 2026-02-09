@@ -1,0 +1,2638 @@
+. Introduction_to_Microstrategy_Infra_Overview__
+OK, fine.
+I'm just turning off the transcription.
+Do we need transcription or no?
+
+
+OK, so I'm just dropping it.
+
+
+Great.
+
+
+Oh, OK, Let me go to SDG.
+
+
+Basically MicroStrategy is it's a BI solution.
+
+
+I, I think, I'm not sure if you have worked on different BI solutions.
+
+
+BI, when we are talking about BI, that means we are talking about Power BI.
+
+
+Yeah, it's, it's one of it is one of yeah, I mean Power BI is, is of course is one of the BI solutions from Microsoft.
+
+
+But I think this, this is another sort of solution from a different company called a Strategy.
+
+
+It used to be called MicroStrategy before, but they have I think renamed their name.
+
+
+So they're called Strategy.
+
+
+And this is first of all, this is a migration use case, which means the use case was already running it.
+
+
+It's currently, it's even currently running in in on premise and we're just migrating it to cloud and we will be I'm sorry, in on premises.
+
+
+It is already running on the Kubernetes or it is running as in standalone machines.
+
+
+It is, I think it's running on Kubernetes.
+
+
+OK.
+
+
+I don't have visibility of on them.
+
+
+We don't have access to on Prem, but I think it's running on Kubernetes still.
+
+
+And the main problem that we are decommissioning is, is the licencing.
+
+
+I think on prems version are using a very old licencing, very old version.
+
+
+And I think that version is not supported anymore.
+
+
+I don't think they are in a position to upgrade to that version.
+
+
+And most importantly, I'm not sure if you have if Rishi told you or if you heard from from anywhere that we are also decommissioning our lake on, on on premise.
+
+
+So we are migrating everything what we had in on premise lake to the cloud data lake, which is built on top of S.
+
+
+So that's also one reason that the data as well as this whole solution needs to be moved.
+
+
+One more thing before I jump onto the diagram, because of course I'll explain now how in front everything is set up.
+
+
+But I think most importantly, it's good to have a understanding like, OK, who, who are the end users of these solutions?
+
+
+How they are going to be consuming these solutions once it's there?
+
+
+Yeah, So let me answer those questions.
+
+
+I think which are quite vital to build that foundation.
+
+
+So first of all, the solution will be used by Santander internal customers.
+
+
+When I say internal customers, this could there could be Santander, Santander internal staff.
+
+
+I mean, don't get confused with customers is like let's say, let's say use and tender of course is a bank, so they have a banking application and of course, like I have a account in Santander, some Santander customer.
+
+
+So maybe I probably should have you Santander internal stuff.
+
+
+So this solution will be used by the internal staff and the staff could be using the solution from the branch Santander branch in the UK and could also be from their corporate offices.
+
+
+And why do they use this?
+
+
+What does it help them with?
+
+
+So basically they have many use cases, but I'm just listing out a few.
+
+
+So financial crime, transaction monitoring, wealth management and COVID loans.
+
+
+These are four of them.
+
+
+Of course, there are many more.
+So they just, they just want to basically we ingest the data, the data is in the lake, we ingest the data from the lake into this solution.
+
+
+And then we we create the reports out of this.
+
+
+And then the report is is not created by us.
+
+
+The report is created by our business teams.
+
+
+And then those reports are used by the end the internal staff or or the relevant teams for the decision making.
+
+
+But that's one thing report contains what?
+
+
+So the report.
+
+
+So I haven't seen those reports, to be honest.
+
+
+But I think the reports are, are more about, for example, they want to find any anomalies, let's say related to like say any, any financial crime, let's say any, any transactions.
+
+
+So there are reports about for example, it could be like, let's say how many, you know, misconducts that has happened, something like this fraudulence and all.
+
+
+Yes, yeah, of course, yeah, fraudulent transactions and stuff.
+
+
+So it's not real time, of course, it's an analytical use case.
+
+
+It's not like let's say a real time use case to let's say do a credit card risk assessment or any identify any fraudulent transactions.
+
+
+Not that I think it's probably reporting to further reporting to stakeholders and but most importantly being used by our internal staff, I think for more decision making.
+
+
+So that's the that's the use case and how our staff will be using it.
+
+
+See this solution is built on top of Kubernetes.
+
+
+So Kubernetes is the centre infrastructure service that host this entire solution.
+
+
+But however, the end user, the staff would be just using it through a web URL.
+
+
+So for example, this is one of the URL in our pre production environment.
+
+
+So they will have, we will share this URL with them.
+
+
+They will simply log in with this URL.
+
+
+It will ask for some credentials.
+
+
+LDAP is also enabled.
+
+
+So they will log into this solution with their normal employee credentials.
+
+
+So for example, we have some credentials that start with E number and followed by E and followed by a number.
+
+
+So they will also log in with this and not everybody will have access.
+
+
+So internally within this micro strategy application, we have groups and these groups are mapped to your AD Active Directory on Microsoft.
+
+
+So the groups are able to.
+
+
+So the groups have a allow list to say which employee can actually log into this solution.
+
+
+I think that's the very high level of what the solution is, why it is needed, who the end users are and how they would be using.
+
+
+Now I'll be just zooming in a bit on the solution in itself, especially from the technical and infrastructure point of view.
+
+
+Cool.
+
+
+So like I said, the solution comes from a third party called Strategy.
+
+
+They have solution provided in the form of Docker images.
+
+
+So these images are stored on on their Azure account.
+
+
+And we have built a GitHub pipeline process to download those images and scan all these images for any vulnerabilities.
+
+
+And if there are any vulnerabilities that are older than  days, then we do not publish those images into our ECR repository because in Santander, OK, OK, OK.
+
+
+You said these images are stored in their Azure repository or Azure, I should say ECR, but correct.
+
+
+Yeah.
+
+
+Then how we are downloading those?
+
+
+I mean, are there are any, there is any pipeline running through which we are downloading it?
+
+
+Yeah, we have built a pipeline.
+
+
+They have provided us some credentials to to download those images.
+
+
+And that pipeline is on GitLab or GitHub or where?
+
+
+GitHub inside the GitHub, Yeah.
+
+
+So we have two main GitHub repositories.
+
+
+Yeah, I'll, I'll walk you through both of them.
+
+
+One is the container scanning and container push.
+
+
+So it scans like I said.
+
+
+So it scans first, downloads these images from there after downloading where it is storing.
+
+
+So it's stored on, see, it's stored on that runner.
+
+
+So basically these jobs runs on the runner, right?
+
+
+So it downloads on the runner where we are running, downloading these images where we're doing docker pull.
+
+
+And then that in that step we have a Docker push to push from that runner onto the ECR.
+
+
+OK.
+
+
+If I'm because why I'm getting confused because on the one side we have ECS, sorry, one side we have ECS and then we have ACR.
+
+
+So now there is no connectivity between ECS and ACR.
+
+
+They both are different individual NDTS.
+
+
+We are downloading it on a runner server from runner server.
+
+
+We are scanning and pushing it towards the ECR.
+
+
+I'm correct.
+
+
+Yeah, yeah, yeah.
+
+
+Got it.
+
+
+Yep.
+
+
+Because the see the pipeline needs to run on a runner and we have Santander internal hosted runner.
+
+
+So we're not using like public hosted runners.
+
+
+So these are internal runners that have these are they are customised more on according to the organisation needs.
+
+
+So that's why the job runs on on internal runners only.
+
+
+But yes, the runners have connectivity to the Internet because once you're within the AWS, you can still connect to Internet.
+
+
+It's not like that, but just that the runners that we deploy on the within the AWS account for them to connect to the outside it it, it is little difficult.
+
+
+I'm not saying it's not possible, but yeah, yeah.
+
+
+But they are more restrictions in in place.
+
+
+So that's where these runner is managed by central team, not by us.
+
+
+And then it downloads these images temporarily pushes scans through a tool called Estrivy from Aqua.
+
+
+This tool would be changing.
+
+
+I think we have been asked to change it to cystic.
+
+
+Not sure come on.
+
+
+If you know cystic No, I haven't heard about that.
+
+
+OK, so it's another it's a security tool.
+
+
+It has it offers plenty of things.
+
+
+So for example, it it offers cure container scanning.
+
+
+It is it, they have their own controllers also and we have also C stick as a installed as a on on our EKS cluster as EKS boards.
+
+
+So it is then able to you know send the real time monitoring onto the central team of Santander and they are able to track our EKS cluster whether it's in healthy state is if there is any security risk, if there are any images with more vulnerabilities.
+
+
+Yeah.
+
+
+So it gives them complete visibility of all the Kubernetes cluster running on the bank.
+
+
+But for now it is the tree V So it scans the image and then of course it pushes to ECR.
+
+
+We also have a more customization in this workflow.
+
+
+I'll again go step by step by just I think we have to see if there are any vulnerabilities because there is one important step in there that we are checking if any image has vulnerability older than  days because as per Santander SLA and probably I think it's good to open up that image.
+
+
+So it's it's part of your recording also.
+
+
+So this is the SLA given by Santander.
+
+
+So our use case is internal and these are the classification of vulnerabilities and the SLA in terms of days that these vulnerability needs to be addressed and fixed.
+
+
+So for example, if I'm scanning an image and if it has it has a critical vulnerability, we are allowed to use this image.
+
+
+That means we can upload the image onto ECR, we can use that image to spin up any deployment state, full set or anything.
+
+
+However, the vulnerabilities needs to be addressed within  days.
+
+
+If this is a must to do, we need to who will, who will address the developer who had created that image or else we have to address that.
+
+
+So in MicroStrategy, because we do not manage these images, they, they are coming from strategy as a third party, right?
+
+
+So that's why we, we just find I have created a, another step in the workflow.
+
+
+It creates a, it basically consolidated and create a report of all the vulnerabilities that we have found among all the images.
+
+
+And we simply share this report with our internal team and then they raise a case with strategy portal or strategy product team on their portal.
+
+
+Because basically see the images are managed and maintained by them.
+
+
+So we cannot fix the images on their behalf.
+
+
+Yeah, I've got that answer.
+
+
+Yeah.
+
+
+So they have to fix it.
+
+
+We just raise a case with them if they if, if we are using any internal images, I think we're using few of them, then we have to fix it ourself.
+
+
+But this is the criteria.
+
+
+If it is a high vulnerability, it has to be addressed in  days.
+
+
+I mean it is simple that we are not the owner, so we are not taking the responsibility.
+
+
+Yeah, yeah.
+
+
+But we we have to just make sure Kamran that we are I think we are at a stage with strategy that we are trying to enforce a process that you know, if any vulnerability of these severities are found strategy also can fix within this SLA, although we it's not our responsibility to fixed, but it's our it's it's we are equally responsible to get it fixed from them.
+
+
+Agreed.
+
+
+Yeah.
+
+
+So for that we need to send them e-mail reminder chats.
+
+
+Yeah.
+
+
+So we are currently see currently the, I would say the collaboration is, is quite good.
+
+
+So we have twice a week call with the strategy team earlier, yes, I think and and there will be more involvement.
+
+
+Earlier we used to have a call every day, but now it's, it's reduced because we have some internal challenges.
+
+
+We're trying to sort out few things on our own.
+
+
+And of course, you know, they are they are charging their time.
+
+
+And of course we, we aren't getting enough help like I said, because we are sorting few internal things like firewalls and stuff and few internal challenges.
+
+
+So that's why we have reduced the frequency of of that collaboration.
+
+
+But of course it will be more.
+
+
+But yes, once everything is, is live, imagine everything is live and we won't be having those calls.
+
+
+Yeah.
+
+
+So I think the best thing would be we'll just reach out to our internal team and I'll add you to our dailies as well for this use case.
+
+
+And I'll, you know, introduce you to all our other team members as well.
+
+
+I think we just need to send them a e-mail of containing a report and I'll show you the report as well.
+
+
+How, how it looks.
+
+
+I think that's the only thing we just need to tell them that we have scanned this month images and these images have these vulnerabilities.
+
+
+Lucky.
+
+
+Yeah.
+
+
+OK.
+
+
+So then yeah, once they are in ECR, the next step is setting up the whole infrastructure which we have already done.
+
+
+We have done in pre production and we are currently at production.
+
+
+Let me just zoom in because there are a few important bits to highlight here.
+
+
+So the first thing is in pre production we have we have single environment and in production we have within the prod AWS account.
+
+
+I'm talking about the AWS.
+
+
+Within the prod AWS we have  environments for micro strategy.
+
+
+I know it might sound a little odd about how why it is.
+
+
+The reason for that is, is the is the number of licence that that we can have.
+
+
+We cannot have licence for all the environments.
+
+
+That's why we haven't set up an infrastructure in our development environment.
+
+
+So the development is kind of treated as a pre environment for micro strategy.
+
+
+So they ideally starts with pre in simple words.
+
+
+And in production, we have a single EKS cluster where we have  namespaces called as discovery, UAT and PROD.
+
+
+We are currently at discovery.
+
+
+So this namespace is where they will actually conduct their testing.
+
+
+And the reason for having this set up is also that the data is actually in the production account.
+
+
+We don't have data in pre production and they cannot do all of their testing in in pre prod.
+
+
+And that's the reason we we have to create sort of three environments for them to be able to test thoroughly before going live.
+
+
+So discovery is meant to meant for our business teams to to test their reports, test the data connections, everything is working fine.
+
+
+And then the UT namespace is doing the same testing with our end users, right.
+
+
+And once they are all happy, then this will be the pro namespace we will create and all the pods and everything that that will, you know, work as a live environment.
+
+
+Yeah.
+
+
+So we have set up a E case in pre pre production AWS account.
+
+
+I think before I even do that, I'm not sure if if you know, but I think it's it's worth highlighting.
+
+
+So we have so there is one to one mapping between an AWS account and environment.
+
+
+And let me also share, I think this table with you because it that one to one mapping.
+
+
+Yeah, I'll explain that by one to one mapping, I mean, OK, cool.
+
+
+Yeah, one to mapping means so that if I say I'm working in pre environment, so it means I have a different AWS account.
+
+
+So that's what I'm just basically trying to say.
+
+
+So for example, we are working in analytics and this is the AWS account ID in dev, this is the AWS account ID in pre and this is the ID in production.
+
+
+So if I'm saying that, OK, I'm working in pre environment, it it means I'm working in this AWS account.
+
+
+Because I, I have seen some organisation where they have within the single AWS account they have, they have created multiple environments.
+
+
+We, we do not have that set up here.
+
+
+We have.
+
+
+That's why I said it's one to one mapping.
+
+
+If I'm saying I'm working in dev, that means it's a separate AWS account.
+
+
+If I'm saying , it's a different AWS account.
+
+
+And likewise or prod.
+
+
+Got it.
+
+
+Yeah.
+
+
+So within prod, in simple word,  AWS account per one environment per one environment.
+
+
+Yeah, yeah.
+
+
+But that cost a lot.
+
+
+Yes, it does cost a lot, but I think that's how we are see in the UKI think there are probably more strict regulations and the way also how the cloud platform has been set up.
+
+
+There are like lot of considerations in in designing this.
+
+
+We just want to make sure our our producers and consumers are operating and I think this is the fundamental philosophy of our platform that.
+
+
+We just want to make our data producers and data consumers, you know, completely isolated.
+
+
+So that's why you see a main account of CDF, which is a business producer.
+
+
+This is the count where your producer applications runs.
+
+
+That means if there is a ingestion team, there's ingestion team that ingest all the data into the data lake on S.
+
+
+But we cannot deploy our EKS in this account and say, OK, I, I want to read in this, we don't want to have all the producers and all our consumers who needs this data in the same just for the segregation and, and also for the proper governance.
+
+
+We just want to make sure that and, and, and you can notice that even for the governance, just for the governance, we have a different AWS account just to trace this down.
+
+
+Who is producing the data, who is consuming the data?
+
+
+Yeah, all these accounts has been linked to the governance.
+
+
+They are under one OU organisation unit.
+
+
+Yeah, OU, yes, yeah, they are under one OU and yes, and these accounts are also linked to the governance as well.
+
+
+Yeah, this this central governance account, we have another category called as operational.
+
+
+This is the this is so there was  main use case which I was kind of part of so I worked on on this.
+
+
+So we have deployed our infrastructure from operational use case point of view.
+
+
+But for micro strategy we'll just be focusing on these.
+
+
+And I think we can even ignore the dev like I said, if we don't have any infrastructure deployed in dev due to the licencing implications.
+
+
+So we only working in pre and in prod.
+
+
+Yeah, all, all these accounts are single sign on or do we have a different, different credentials we need different they are single sign on.
+
+
+Yeah, single sign on.
+
+
+OK, OK, cool.
+
+
+So any any questions Cameron and anything how many nodes are running, how many nodes are running, running behind the EKS?
+
+
+See at the moment we are running a three node cluster because we have just been up the first environment within this EKS which is discovery.
+
+
+But of course, we will need to our, you know, scale in our cluster because the UAT namespace will also will have to create a similar environment.
+
+
+So basically see we have created a cluster, we have nodes, but we need to create three different environments and we need to ensure and each environment.
+
+
+And there is nothing shareable between between these environments.
+
+
+So for example, if discovery needs let's say  ports, which are all application ports, UAT will also need  ports and likewise prod so that we are not sharing anything.
+
+
+They are kind of separate environment in themselves.
+
+
+That's why we have  nodes, but they are quite large nodes.
+
+
+We are running a node of RAM capacity of  gigs.
+
+
+Oh my God.
+
+
+Yeah.
+
+
+So it's we are using what is RR large or maybe R double X large, Yeah.
+
+
+We're using RX large, that's quite big machine, but we already have this Terraform module ready to be deployed on the rest of the accounts to provision EKS, correct?
+
+
+So Terraform pipeline, Terraform repo and the pipeline is already there, Everything is there.
+
+
+The pipeline, the same repo has a workflow to deploy to pre and and to prod also.
+
+
+And I think it's it's highly reusable.
+
+
+So if you have to even let's say create another two environments, I think we have got majority of the things covered.
+
+
+There's probably very few things pending now.
+
+
+So, so that everything is is part of one single repo in terms of provisioning anything.
+
+
+OK, got it.
+
+
+Yeah, OK.
+
+
+I'll, I'll proceed then.
+
+
+So yeah, let move forward please.
+
+
+And one last question, is there any backup we are also taking for the Ek?
+
+
+So it is without backup.
+
+
+Now the Ek is without the backup because for EKS, I mean, see we have other data related services like we have EFS, we have elastic cache, elastic searches for, you know, searching through the logs and stuff.
+
+
+And we have Postgres as well.
+
+
+So these are the data storage services.
+
+
+That's and they have the backups enabled.
+
+
+So we don't have any backup for E EKS nodes.
+
+
+OK, got it.
+
+
+No, cool.
+
+
+Yeah, so EKS, like I said it you know, it is the the main service that hosts this infrastructure.
+
+
+Then we have some more like we have a EFS because when we install the strategy components, so they have two sort of steps.
+
+
+So first of all, we need to step install the the management layer, which we call the operator also and it needs an EFS.
+
+
+And then secondly, when you install the environment, they also needs the EFSEFS because different ports are sort of, you know, using the same EFS to store the configuration.
+
+
+EFS is mainly to store the configuration in order to store any data as such.
+
+
+It's just to store the configuration so that all the ports have visibility to that configuration.
+
+
+The EFS is used Elastic cache.
+
+
+We're using Redis here.
+
+
+It is to cache, I think cash out some, some data.
+
+
+We haven't, I haven't seen this fully, to be honest.
+
+
+I mean, so far we have just provisioned this.
+
+
+We haven't, I don't know if the business team has run some queries to this, but I've just seen OK, some tables being created within this, but we haven't analysed like how exactly it is used, which data is it is cached.
+
+
+Yeah, because probably it's not our job to you know, analyse these sort of things.
+
+
+But yes, of course it is there.
+
+
+We have provisioned it for them and they're able to use this, you know, solution service to cash out their, their data post, Chris.
+
+
+Again, it stores see the data that we, like I said, once the solution is there where the main data will come from, the data will come from the business producer, right?
+
+
+And that's why I shared you these accounts.
+
+
+So we have this data lake that's built on this business producer on top of S service where the producers ingest all their data.
+
+
+That's why you can see we have a MicroStrategy running in a different AWS account and even MicroStrategy has its own VPC.
+
+
+Also.
+
+
+Usually we don't create a separate VPC per use case.
+
+
+It's, it's not recommended here, but this use case was  exception and that's why it even runs in its own VPC.
+
+
+But in that scenario, if we are using the same VPC, is there any issue arise regarding the IP threshold or IP limitations And not so far because like I said, it's a dedicated, it's a VPC dedicated to this use case.
+
+
+So there are no other teams using this VPC.
+
+
+We have seen IP problems in, in business producer accounts because that's where multiple teams are using and deploying their infrastructure services, right?
+
+
+And, and of course we have seen the IP in the subnets getting exhausted, right.
+
+
+So not having enough IPS, but for this use case, we haven't seen it.
+
+
+And, and, and that's why we just, that was also one of the reason they were just wanted to make sure these have enough IPS to run these services.
+
+
+What do, because already I also face this kind of issues like regarding the IP threshold and IP limitation, IP exhausted.
+
+
+So I'd seen that's why I had to ask you this question.
+
+
+No, no, for sure.
+
+
+It's, it's a valid .
+
+
+It's a really good one.
+
+
+And it was a, we had seen this problem in our business producer account.
+
+
+That's why I think if you log into the AWS, you will see two VPC created application and batch.
+
+
+Initially there was one VPC called application where all the teams were deploying their services in this VPC and then eventually over time we were, we started running out of IPS, especially from the routable subnets.
+
+
+Workloads were still OK and I think we were stuck at a point.
+
+
+So that's why we create, we sort of segregated it to say if any team is running batch based workloads, they need to use batch VPC.
+
+
+If any application is, if any use case is sort of real time, they have to use the application VPC.
+
+
+Got it.
+
+
+Cool.
+
+
+So I was saying the data comes from this business producer where the data lake is hosted.
+
+
+And how this MicroStrategy solution connects to this is it basically has multiple, it supports multiple data sources.
+
+
+So you can connect, you can create a data source of type Athena by you know setting up a through the JDBC and with that you can run Athena queries.
+
+
+You know that will of course will will fetch the data from the data lake.
+
+
+So this is this is the only source for now and this is phase one which I'm explaining.
+
+
+You can see there is a phase two and this is also part of Phase .
+
+
+The Phase  is connecting to on Prem because in on Prem they have some database instances from where they want to read some information.
+
+
+Again, we are only working in phase one.
+
+
+Phase  is is also being discussed in parallel.
+
+
+Our business team are running through the requirements with the architecture.
+
+
+So we are currently having architecture meetings and getting approval from them.
+
+
+But we have to st implement the Phase  completely and then then only Phase .
+
+
+So I think let's not discuss phase two for now because the immediate focus is phase one only.
+
+
+So that means keeping everything within the AWS.
+
+
+Sure, Cool.
+
+
+I think that's probably it.
+
+
+And of course, yeah, we have Santander, there is something called as landing zone.
+
+
+So and it's managed by a Santander that's that's why we call it SLZ Santander landing zone.
+
+
+So we have some networking account right, where all these traffics are intercepted and being analysed for any malicious patterns or anything.
+
+
+And of course you know they are denied if if there are any traffic patterns like this.
+
+
+Cool.
+
+
+I think that's pretty much on the architecture what we are setting up here.
+
+
+Next, I can brief you very quickly walk you through the the repos and the two main repos that we use for micro strategy and how we have.
+
+
+Can you give me a minute?
+
+
+Let me use the.
+
+
+Just give me a minute.
+
+
+I'll be back in a minute.
+
+
+No problem.
+
+
+Let me pause the recording.
+
+
+Give me a minute only.
+
+
+Yeah, sure.
+
+
+Can you stop the recording or pause the recording from your side?
+
+
+Is it possible or shall I have to stop the recording?
+
+
+No, no worries.
+
+
+Let me see.
+
+
+I OK, Think let's continue this.
+
+
+I'll be back in a minute only.
+
+
+I'll be back.
+
+
+Yeah, sure, that's fine.
+
+
+Yeah, copy lineback.
+
+
+Sorry for the.
+
+
+No, no, no, no, it's at all.
+
+
+No worries at all.
+
+
+OK, so we have two main repos here for MicroStrategy  is called MicroStrategy Analytics Terraform, I think.
+
+
+So one thing which I want to call out, I think you will see it everywhere and it's good because everything we create, let's even in future, it has to follow this naming convention.
+
+
+So you and it applies for all the AWS resources, Terraform variables, everything that we have to follow a naming convention.
+
+
+So it's followed.
+
+
+So it starts with CDF, which is cloud data foundation, right name of our platform, also sometime called a CDP cloud data platform, followed by the name of the use case micro strategy and in which accounts, AWS accounts, we are doing it.
+
+
+So it's analytics and and it's of course, it's a Terraform repo, right?
+
+
+So CDF MicroStrategy, this is fixed.
+
+
+I mean, this, this is something you will see it everywhere in all the resources.
+
+
+And this helps in, you know, identifying your resources quickly, right?
+
+
+So that you can say, OK, these resources belongs to these teams.
+
+
+And of course, we have some internal IM policies also, so that are attached to all the IM roles to make sure each team has access to their own resources because, you know, it's a multi tenant account.
+
+
+We don't want teams to be, you know, interfering with other people resources.
+
+
+So we it's we have some internal policies.
+
+
+I am policies that ensures first of all, that all the resources needs to follow this naming convention.
+
+
+Only then you will have access to to those resources.
+
+
+Otherwise you won't.
+
+
+Yeah.
+
+
+But I think maybe that's something that's for another day.
+
+
+OK, so like I said, we have a dev branch also, but I think it's very quite far behind I would say from the pre.
+
+
+I mean, initially we I just created a ECR repo just to test out the images, but there is nothing in dev mainly.
+
+
+So we usually start with pre.
+
+
+So we have pre and prod ignore master and and of course this is a feature branch in terms of creating branches.
+
+
+Also we usually create them with this naming convention feature and then the/ and forward by anything that you are working on.
+
+
+So just a very short description of that.
+
+
+And then you work on your feature branch and and simply raise a pull request and and someone will review and and we'll merge it.
+
+
+But in terms of the, the structure of the repository, so we have  main folders here, infra.
+
+
+I think infra is the most important.
+
+
+I have recently added app also because we're doing few things that belongs to application, but our application team doesn't have cloud and Kubernetes expertise.
+
+
+So that's why I had to do some of their work as well.
+
+
+So I just created a app just to just to make that distinction.
+
+
+And, and of course, you know, make it very simple.
+
+
+I mean, I, I believe in simplicity.
+
+
+I don't want to don't like creating complex things.
+
+
+That's why I'm just trying to keep the infrastructure like same here.
+
+
+I mean same here.
+
+
+Indexing is very clean.
+
+
+Let's say if you are writing a file that has to go in a separate folder, if you are copying some package that has to go in a separate form, yeah, yeah.
+
+
+Otherwise that makes messy for you to manage and you know to find out in the future, suppose if you are just checking where I have done that.
+
+
+So it makes difficult for you to figure it out.
+
+
+You'll take  to  minutes just to figure it out where you had done that or where you have written that.
+
+
+Exactly.
+
+
+Exactly.
+
+
+Aman Yeah, that's the point.
+
+
+I mean, I always you know, encourage my team in here also to to always follow that and infrastructure also you would see I have gone.
+
+
+I think this is a new approach we followed.
+
+
+I mean in other there are many use case using it.
+
+
+But I think CDF in within CDF, we were the first among this.
+
+
+So usually in Terraform repo you would see, right, all the files within the same folder.
+
+
+But we kind of, we just want to make it very simple and easy to understand.
+
+
+So that's why I have three folders within it because you know, right, Terraform can only read files within the same folder.
+
+
+It doesn't work with directories.
+
+
+So that's why we have  state file, one for each folder.
+
+
+And we just wanted to make it separate so that if I want to make a change in the database, I'm not impacting anything on a case.
+
+
+OK, So with that, we have three main three folders from infrastructure perspective, core sets up your foundation.
+
+
+So core has basically, let's say your it, it has your ECR, it has EFS open search, NES, three bucket that you need.
+
+
+So very like basic level of services and and then in database we have tried to.
+
+
+So basically I've tried tried to logically merge services with respect to what kind of service they provide.
+
+
+So let's say in database I have RDS and then I've also got Elastic cache because essentially they fall within a database, right?
+
+
+So this is in memory database and this is like a normal relational database.
+
+
+Yep.
+
+
+And and we have of course config which where we have right the TFR files, so one for each environment and and then the last folder and the main one is EKS.
+
+
+So this is probably the biggest and we have more folders in here.
+
+
+So in EKS, everything around EKS because we know EKS is.
+
+
+This solution is, is mainly managed on the EKS, so that we just wanted to keep EKS separate.
+
+
+And of course we knew that there will be ongoing maintenance for EKS also.
+
+
+So we just don't want to impact any other resource.
+
+
+Yeah, so that's EKS.
+
+
+I think that's pretty much on the infra and in terms of where I mean where the modules are.
+
+
+So you would see a folder called as module.
+
+
+The module is only for EKS.
+
+
+Actually we now we also have a central repo where this module is hosted.
+
+
+But I think I've made some additional changes as we might just need to reconcile it.
+
+
+But I mean it's not, it's not a priority at all.
+
+
+Usually we don't keep modules in here and the reason is within Santander we have another, I'm, I mentioned about SLZ rights and tender landing zone.
+
+
+So we have a central team that provides the Terraform modules.
+
+
+So for all these services we have just, you know, used the module.
+
+
+We haven't created, let's say RDS from scratch.
+
+
+We haven't written the whole code for RDS because the, the, the organisation has the reusable Terraform module.
+
+
+So we're just using for them.
+
+
+For EKS it was a slightly different.
+
+
+For EKS there was no central module for a long time.
+
+
+But recently our SRE team had created an EKS module, but that module had some problems it it wasn't fit for this use case.
+
+
+So what I had to do is I had to just clone their module in my report and I modified it according to this use case.
+
+
+But I I've just kept it generic as well.
+
+
+I mean, it's not very specific to this.
+
+
+There are other teams also who who are using this module within CDF.
+
+
+To be honest, I'll, I'll just try to keep it according to CDF and that's why this module has two main folders.
+
+
+I've also tried to keep it very simple, easy to understand.
+
+
+There are two main folders within EKS.
+
+
+ is EKS cluster that sets up to your basic cluster.
+
+
+So for example, it set up your EKS sets up your oath node groups and everything, right?
+
+
+So you have a bare minimum EKS cluster running.
+
+
+And the second folder is the add-ons.
+
+
+So you can see we have a folder for each of the add on.
+
+
+So load balancer, Calico cert manager, Diana trace, EFSEBS state matrix, reload resist stick.
+
+
+This was the tool I was talking about from the vulnerability scanning.
+
+
+So we had Treeview before and now we will have cystic.
+
+
+And again, each of these add-ons are optional.
+
+
+When you call the module, you can specify whether you wish to install these these add on.
+
+
+Let's say if I only want some of them, I can still do it.
+
+
+It's not like one either all or nothing.
+
+
+So you have complete flexibility of what add-ons you need.
+
+
+And if we need to add more add-ons, I think it will be get it will get added in the central GitHub repo where this module is now will be maintained going forward.
+
+
+Yeah.
+
+
+So that's why this folder gives you complete flexibility of of any add-ons that you wish to install.
+
+
+Because I think this is a quite common requirement that not all use case need all the add-ons.
+
+
+Some needs few, some needs few.
+
+
+So we we've just kept it optional.
+
+
+We just provide a flag saying, OK, I need this add on and that's it.
+
+
+OK.
+
+
+I think it ignore is fine.
+
+
+These are OK, OK, so I'll probably go to the app.
+
+
+So in app see there are few things that we had to do for application team.
+
+
+Like I said, because they don't have the technical expertise.
+
+
+They are more like, I would say they're more than a more like a business team than application team.
+
+
+We don't have actually an application team here, some kind of working as a both application and this.
+
+
+We just, we have a business team that you know that will just use this solution and create the reports.
+
+
+Yeah.
+
+
+So there was one application that we had to configure.
+
+
+So I just create a created a Docker file.
+
+
+That's why you see a Docker file.
+
+
+I created an image, pushed it onto our ECR and then this is a Python programme that this image has.
+
+
+And this image is then run as a Crone job basically because this job needs to run every  minutes.
+
+
+That's the only thing we have done for application.
+
+
+Then going to GitHub, we have multiple workflows.
+
+
+So like I said, we in infra, right, We had in infra, we had three min folders, core database.
+
+
+Any case, that's why we have two workflows per folder.
+
+
+So we have APR workflow which is your pull request workflow, right And we and here also we are calling a central Rep workflow from our SLC team, right.
+
+
+So in our workflow, we are calling this workflow by overriding these arguments.
+
+
+So which is the OIDC role and which directory?
+
+
+So you can see, I think that's why we're able to use these different directories in Terraform, because Terraform then treats infra and core as the main directory and then it creates a straight file of all the files inside this.
+
+
+Similarly, there is a core deploy workflow and you can see it's uses a deploy action.
+
+
+The PR uses a different, actually it uses APR cheques, right?
+
+
+Similarly, we have one for database and one for EKS.
+
+
+So PR and are we running, are we running any?
+
+
+I mean, are we running as a GitHub action?
+
+
+Yeah, they are GitHub actions.
+
+
+Yeah, they are GitHub action.
+
+
+OK, yeah, yeah.
+
+
+Because I can see something variables or I mean default variables.
+
+
+No, we at the rate something.
+
+
+So earlier I was assuming it is running at a GitLab, but no, it is a GitHub action and it these are all GitHub actions.
+
+
+You can see in the action stamp we have different work flows.
+
+
+And if I let's say pick any core PR or let's say, yeah, more Eks.
+
+
+So you will see all these workflow just for the EKS PR, if you just wanna see EKS deploy.
+
+
+So we have all these workflow runs for EKS PR, yeah and yeah.
+
+
+And I have created two more workflows for for the app.
+
+
+Like I said, we created a app folder for application.
+
+
+So I had to create a workflow that, you know, that creates an image from the Stoker file and secondly then deploys this application as a Cron job.
+
+
+That's pretty much it.
+
+
+We have a operator workflow as well, MSTR operator.
+
+
+I think in the diagram I had shown that right.
+
+
+One thing is setting up the infrastructure, but the next part of it is setting up the MicroStrategy specific implementation.
+
+
+And the first part is installing this management layer or the operator.
+
+
+And again we installed.
+
+
+See we did all these steps in pre production manually, but we are not allowed to do any manual things in production.
+
+
+That's why I had to create a workflow.
+
+
+So I have created a workflow called as MSTR operator.
+
+
+It's not needed now to be honest, because the operator we have created in  manually, but more importantly it is created in production and we only need this once.
+
+
+One operator can manage multiple micro strategy environments.
+
+
+So we won't be needing this actually idly.
+
+
+But it's just that let's say if EKS cluster, we need an, let's say we need to delete this EKS cluster for some reason or something happens and we need to run this.
+
+
+We have everything, but this won't be used.
+
+
+And then of course, we have a state unlock.
+
+
+If the telephone file gets logged, then we can do it.
+
+
+We have another PML files for the workflow which basically sets up our runner.
+
+
+So actually there there is one fundamental difference I think.
+
+
+Just keep that in in mind Cameron, please.
+
+
+I just keep it kept this.
+
+
+I mean we can change it as well, but reason I kept this because I think it makes few things quicker.
+
+
+So basically we have our internal organisation runners, if I go in here in the settings, actions and runners you will see shared with this repository.
+
+
+So we have plenty of runners shared with our repository.
+
+
+And these are these are enterprise runners and we have our own Santander runners also.
+
+
+We are using one of them.
+
+
+I don't know if it is showing SLZ paraform.
+
+
+Yeah, we are using this one SLZ Terraform runners.
+
+
+So the major.
+
+
+So for core, I think this is  distinction.
+
+
+Please keep in mind.
+
+
+So for core folder and for database we are using SLZ Terraform runner as a GitHub runner to to run our Terraform pipeline and and of course deployed infrastructure.
+
+
+For EKS we have we have our own self hosted runner.
+
+
+The reason for that is these runners don't have connectivity to EKS.
+
+
+I don't know why is that.
+
+
+And that's the problem like these.
+
+
+Although these runners are shared, the teams have recently changed their model.
+
+
+They are saying it's best to use your own self forced runner.
+
+
+So ideally for core and and database folder, we can use these runners as well.
+
+
+But because we have  runner per environment, if we have to, that's a push.
+
+
+Any change then it there, there is single runner.
+
+
+So runner can execute one step at a time, right?
+
+
+One job at a time.
+
+
+And and that's why the other workflows, they have to wait for, you know, the other jobs to finish.
+
+
+Basically.
+
+
+That's why I've kept a database and and core onto shared runners.
+
+
+So you will see the core PR runs on, you can see SLG Terraform runners.
+
+
+So core and database both like PR and deployment.
+
+
+I'm considering both, right?
+
+
+PR and deploy.
+
+
+Even you can see database deploy, they both run on SLG terraform runners.
+
+
+Because in here we have to just terraform just needs to connect with AWS basically, right?
+
+
+It just needs to run AWS provider.
+
+
+Whereas for the EKS, you know right, it's not just EKS, you have to terraform has to use cube CDL provider, it has to use Helm as a provider, right.
+
+
+So it has to use different provider and these shared runner don't have connectivity to these sort of providers.
+
+
+That's why we have created our own runner and that's why you will see runs on MSTR followed by the environment name which is pre or prod depending on the environment we are in.
+
+
+And so EKS workflow runs on this, whereas the core and PR runs on other workflow.
+
+
+So maybe we have done the, we have done the segregation.
+
+
+I mean you have done the segregation between the runners also so that if it is related to the EKS go on this one and if it is not related to EKS, then go on this runner manually.
+
+
+We have to find that inside the script.
+
+
+Oh yes, yeah, in the workflow you have this.
+
+
+Yeah.
+
+
+So there is no need to wait for the available runner to pick up the job and run.
+
+
+It is already mentioned in the channel that especially you have to go and run on this runner.
+
+
+Yes, yeah, yeah.
+
+
+That's the standard we follow here.
+
+
+Like you have to specify which runner you have to use.
+
+
+You cannot say any, any pick any random runner even for core, you will see we are not saying OK, you can use any runner available in the organisation.
+
+
+We're just saying no, you have to use only this runner.
+
+
+SLZ Terraform runners.
+
+
+Got it.
+
+
+Yeah.
+
+
+So this is the runner file.
+
+
+I know I could have clubbed this as well.
+
+
+Again.
+
+
+I mean, we can do it probably we don't need ML files here, but I think we quickly needed to create one in each.
+
+
+So that's why I just replicated because we were stuck for a long time.
+
+
+So this I mean, you can ignore dev one because in dev, like I said, we're not doing anything in dev.
+
+
+So this workflow, these two files are mainly to set up your self hosted runner, which is needed to run your EKS terraform changes, right?
+
+
+Because like I said, EKS jobs runs on our self hosted runner which resides in our AWS account.
+
+
+But the runner needs to exist as well, right?
+
+
+That's why we are using a central workflow and you can see we are calling some Terraform actions Cloud SRE, TF based workflow and this spins up the runner for us.
+
+
+This spins up the runner not only spins up the runner, but it also registers the runner in our repo.
+
+
+So you will see the settings in actions and runners.
+
+
+You will see these runners are already registered.
+
+
+So which is also the best part about it and even best part about it is it is registering the runner without using your GitHub personal access token.
+
+
+And the team, our internal SRE team has built, they're using a different way because earlier we were using our an individual's personal access token because that's, that was the only way like you could, you know, register your runner basically with the with the, with your repo, right?
+
+
+Because on the runner, you have to run some commands, right, to register that runner to to that GitHub repo.
+
+
+And and for to do that to for you to connect to GitHub from your runner, you need to provide some sort of authentication.
+
+
+And we were providing personal access token like in older projects.
+
+
+But SRE has has done some better job here that it's using some temporary tokens and it's not using anybody's permanent credentials or personal access token to do that.
+
+
+Yeah.
+
+
+So these runners will show up here.
+
+
+So that's why when we say in the runner runs on MSTR environment name runner depending on the environment name, if it is pre or prod, it will pick up this runner or this runner.
+
+
+So these runners are you can see idle and available to pick the job and and they belong to like they are part of our AWS account.
+
+
+So you can even check them out in in the AC console.
+
+
+Any questions see not here.
+
+
+Let me go through with the recording once and it would be great if you have done some hands on in front of me so that you know gives a lot of clarity, more clarity.
+
+
+I'm good.
+
+
+OK, as of now what I you are saying, I do understand everything about the environment.
+
+
+I'll go with the recording once also after this call or maybe tomorrow before we connect again.
+
+
+But definitely that time if I'll miss something, I'll ask you and when you are doing, when you are doing certain engagement or certain hands on if I join you a door time as well.
+
+
+So that gives you know, without question they will ask.
+
+
+There is no, I mean there is no question after that for sure, for sure.
+
+
+Yeah, if I I do it, Yeah, sure.
+
+
+I'll I'll add you in.
+
+
+I think yeah, we will do some sort of peer programming or I'm gonna peer task because that will at at least let you know if like all the steps that how we're doing.
+
+
+I think I haven't.
+
+
+One thing which I haven't touched, I guess is how do we connect to environment?
+
+
+How do you access our EKS cluster and stuff?
+
+
+Absolutely that that I'm waiting because I know those will be the later part because as of now, as of now we are doing it.
+
+
+This is an infrastructure, what should I say infrastructure overview.
+
+
+So the later on we will go on how to connect, check the environment, also how the clusters are running.
+
+
+So that's a later, but I know that.
+
+
+Mm hmm.
+
+
+Yeah, I'm not in a hurry.
+
+
+I'm going very smooth, man.
+
+
+I need to understand each and every aspect of this project.
+
+
+Yeah, exactly.
+
+
+No, no, exactly.
+
+
+Let's take it step by step.
+
+
+That's why I when I haven't jumped on to anything.
+
+
+So just I think I'll just try to keep it structured.
+
+
+Was explaining the overview and then bit about how repos are set up and but not exactly, you know, going through the code because I think that's that's probably later in the day.
+
+
+OK, I think before we end, I just quickly wanted to very quickly show another repo.
+
+
+So it's called again, you can see we are following that's convention.
+
+
+So CDF micro strategy followed by the name.
+
+
+So this is container images, right?
+
+
+Like I explained earlier, we are getting images from third party.
+
+
+So we need to store these, scan these images and then push to ECR.
+
+
+And that's where this report does that.
+
+
+It's a very basic report.
+
+
+It's not even as big as the other report.
+
+
+So here we have if you go to pre, should have two files.
+
+
+Yeah, we have.
+
+
+It's basically the workflows only.
+
+
+But let let me explain these files.
+
+
+So, so basically we get on the MicroStrategy website, we have to download a artefact.
+
+
+So artefact is nothing but a zip file which contains some some more files.
+
+
+So let me show you that also.
+
+
+So the zip file looks, yeah, the zip file looks something like this strategy one followed by the year and the month.
+
+
+And when you extract it, it has some more files.
+
+
+Yep, the only file that is of our interest is docker pull script.
+
+
+So if you open with any editor it will show it.
+
+
+I mean they basically have provided us a script to pull these images but we are not using it.
+
+
+All I do is I just strip off everything from start until this/ and I just need the images name because we have our process built.
+
+
+So that's what I do.
+
+
+I just copy everything and I just paste into images dot Jason, as you can see, right, I just have the image name.
+
+
+I don't have anything as prefix.
+
+
+And the next thing is the workflow.
+
+
+I think it's just the workflow.
+
+
+So we have just two workflows, the PR workflow.
+
+
+So it reads the Jason file, this image Jason file, and then it runs a workflow.
+
+
+It runs one job per image.
+
+
+So depending on the number of images, if we have  or  images, it will run  jobs within that main main job, right?
+
+
+And then it will just try to download the image, connect to the MicroStrategy docker registry, pull the image right.
+
+
+It will just try to form the tree V file name.
+
+
+It runs that vulnerability scanner analyse this tree V results and this is what I have created.
+
+
+It uses you can see it's calling a Python file called as analyse tree V results.
+
+
+So we have two sort of Python files, analyse tree V result and analyse tree V result.
+
+
+All as I explained in the beginning right as per centenders SLA we are allowed to use any docker image as long as it it has vulnerability not older than  days.
+
+
+If there are vulnerabilities older than  days, we are not allowed to use that image.
+
+
+So that's why I am.
+
+
+The trivia scan does not have this sort of functionality to say, OK, trivia, can you find all these images which are older than  days?
+
+
+So that's why trivia is giving me a standard result, scanning all the images and listing out all the vulnerabilities that has.
+
+
+Doesn't matter whether it was raised, whether the vulnerability was found yesterday or it was found two months ago.
+
+
+So it's giving us all the vulnerability.
+
+
+But then we pass on that output of trivia to this Python file.
+
+
+So this Python programme reads this Jason, and then it has a logic basically, which is this one, right?
+
+
+So it checked if the published when the when the vulnerability was published, let's say if the vulnerability was found, if it is less than the the threshold date and our threshold is nothing.
+
+
+But you can see from today's - days.
+
+
+So basically all we are finding is if if there is any vulnerability with published date less than the threshold date, which means any older than  days, any vulnerability older than  days.
+
+
+And then what we are saying is found old vulnerability set to true and we are exiting the programme and exiting the workflow there itself.
+
+
+Yeah, so that's what we are doing.
+
+
+And we don't upload that image.
+
+
+So it's the same thing we have here as well.
+
+
+In the deploy to ECR, we run this vulnerability scan, we analyse this here we are setting up a double S credential.
+
+
+And if if an image doesn't have any vulnerability, if it has any vulnerability, this step will fail because I have said sys dot exit .
+
+
+So it will exit not only the Python programme but the whole workflow itself.
+
+
+So the workflow will fail and these steps will not execute itself.
+
+
+If there is no vulnerability, the following steps will continue and it will set up AWS by the credentials and log into ECR and simply push the image to ECR.
+
+
+And how often we use to run this pipeline.
+
+
+See every month strategy is releasing their image.
+
+
+They have a once once per month release.
+
+
+I think the the release is mostly on around th or th of every month.
+
+
+So we I think tomorrow, sorry, yesterday only we had a release from them.
+
+
+So I just scanned the images.
+
+
+OK, Yeah.
+
+
+So it's only once a month.
+
+
+Suppose let's say we have a  days time of period to remove the vulnerabilities.
+
+
+You have run this, you found that OK, one image is there that has the vulnerability next month.
+
+
+You have scanned the same thing and you found that the vulnerability has not been removed.
+
+
+In that scenario, what is the call?
+
+
+See, we need to, like I said, we need to raise a case.
+
+
+As soon as we found find any vulnerability, we have to create a report.
+
+
+And this is what the report looks like.
+
+
+Yeah.
+
+
+So this is the report which I have been preparing for a while now.
+
+
+So you can see the report has tabs arranged by the same format year and month.
+
+
+So yesterday only I created this  and even this structure is already part of the workflow.
+
+
+So Python programme also creates the columns and everything for you.
+
+
+It doesn't append in this file, it basically creates a new file.
+
+
+You just have to copy paste from that particular file into this consolidated file.
+
+
+Because this has a complete tracker of all the vulnerabilities across all the releases.
+
+
+But the good thing is you don't have to.
+
+
+You know earlier what I was doing, I'll tell you that.
+
+
+So what I was doing is this is the workflow, for example, right?
+
+
+So it reads the images.
+
+
+And like I said, it creates multiple jobs, one job per image.
+
+
+What I was doing is, so for example, wherever you see green, that means image hasn't got any vulnerability.
+
+
+Wherever you see red image has vulnerability.
+
+
+So earlier we were failing the process, the whole workload analyse step itself.
+
+
+But what I was doing is I, I was reading this information and copy pasting manually.
+
+
+As you can see vulnerability ID is this I was copying from here, pasting it here, vulnerability ID right here.
+
+
+Then I was copying published it.
+
+
+So I was so we had all these columns in here and I was copying this into Excel.
+
+
+But it used to take a while, right?
+
+
+You can see how many images we have and then in the and in this release, we only have three images with vulnerability.
+
+
+But in November we had, I guess all of the images had vulnerability.
+
+
+There was hardly an image without vulnerability.
+
+
+So it took a lot of time to do this.
+
+
+That's why I have fully automated this.
+
+
+Now there is a third step in this called as consolidate CSV.
+
+
+What it does it it creates a CSV file and it also gives you a link to a CSV file.
+
+
+So that CSV link is here.
+
+
+So you can just download it here.
+
+
+Yeah.
+
+
+So you can see it's it's downloading a CSV, it will give the CSV consolidated.
+
+
+Yeah.
+
+
+So it will give CSV in some in this form.
+
+
+You can basically copy paste from here.
+
+
+And just the structure is also the same, like it starts from image name.
+
+
+If I go to this and now go, let me close it.
+
+
+Yeah, yeah.
+
+
+So you can see it has image name, vulnerability, published date vulnerability, title severity.
+
+
+So all the columns are In Sync.
+
+
+We just have to copy paste from this file into this file, that's it.
+
+
+And just align the format and and this is the file.
+
+
+Like I said, we just have to share with the business team, that's it.
+
+
+One last thing I think that I didn't explain was in pre we actually have two files.
+
+
+So basically I explained right.
+
+
+So we have, we are filtering out, we're, we're validating if, if an image has got any vulnerability older than  days.
+
+
+And we don't, we don't allow or that image to be published to ECR.
+
+
+However, there is also, it's a well known fact, right?
+
+
+So for example, I, if I scan an image today, it might not have any vulnerability today, but maybe let's say after a month, it might build some vulnerability, isn't it?
+
+
+So it it might be it might still be within the  days or maybe let's say if an image has vulnerability and the published date of that image is let's say on the eighty th day or let's say th day.
+
+
+So it is within the  days time frame.
+
+
+But after  days, after two weeks, this image will be classified as non compliant, right?
+
+
+Because it falls outside of the  days time frame, isn't it?
+
+
+But that's why I have built this workflow which is which list all the vulnerability.
+
+
+Because this workflow your TV analyse TV result, this will only found out vulnerabilities which are older than  days.
+
+
+So if we, we also sometime we also want to find vulnerability which are within the  days, right?
+
+
+Because soon they will be also classified as non compliant.
+
+
+So we want to share those information as well with the strategy product team to say, hey, can you also work on these images?
+
+
+They are or these vulnerability they are OK now, but in in couple of months they will also be noncompliant so that we can share this info, you know at the beginning.
+
+
+So there is no philtre here.
+
+
+You can see it finds all the images irrespective of when they were published.
+
+
+OK, we got it.
+
+
+Yeah, but but our pipeline mainly uses this one only analyse trivia results because as percent tender SLA the the screenshot that I had shown you before, right.
+
+
+This one, we are allowed to use image if it has these vulnerability but within the  days.
+
+
+So that's why the workflow uses this one.
+
+
+But I have also created this file.
+
+
+So in case if we need if team asks you tomorrow common, I need to list all the vulnerability in this release.
+
+
+What you can just do is you can amend the PR workflow at this step.
+
+
+So instead of saying analyse V result dot PY, you can just change it to analyse V results_all dot PY and it will list all the vulnerability.
+
+
+That's it.
+
+
+I mean, we could create a new workflow as well, but it's just that there have been more many like more and more workflow.
+
+
+What sort of what sort of vulnerabilities do we often get?
+
+
+I think it's, it's related to their base image sometimes.
+
+
+See, I'm not saying it's, it's their, it's their own implementation, but I think it's about what base image they are using.
+
+
+So for example, there's one image  vulnerability is the integer truncation in Sequel Light  is about Lib XML.
+
+
+So even we are not sure if they're using these libraries directly or not.
+
+
+They might not be using it.
+
+
+I think that's that was also one of their point.
+
+
+They even they are not sure whether they are using or sometimes they have said like they are not using these libraries.
+
+
+But the problem is if whether they use it or is not because these are vulnerability and they need to be addressed.
+
+
+So either they need to use a new base image with the new Sequel Lite version or which has a new version of these libraries or or do something or maybe remove this binary altogether if it is not needed.
+
+
+Because I have encountered a lot of vulnerabilities, let's say non compliant the root access, you know these kind of vulnerabilities mostly we found when we are creating a new image by ourself or someone else is created.
+
+
+So this is the common vulnerabilities like root access enabled or yes, yeah, we library issue now I understood what you mean.
+
+
+Yes, I think these are those issues that you said are more common when you when you create the image yourself.
+
+
+I think in in this case because I mean strategies team is creating themself but I think more importantly they do not have any way to check if this has any vulnerability.
+
+
+Maybe their process, their let's say their custom code that they are writing in these images or their Java application or their Python code doesn't have any vulnerability.
+
+
+But the internal packages may be used by those programmes or or even the the image where these packages runs that underlying image has has some vulnerability.
+
+
+That's what we have seen.
+
+
+We have never seen anything like let's say root access issue or anything.
+
+
+I think from on those sites, I think they have done the good job.
+
+
+We haven't seen any issue like that, you know it anything like that has been found.
+
+
+But it just I think what sort of versions of the libraries they have and they use that base image have been identified.
+
+
+Yeah.
+
+
+So yeah, I think that's all pretty much on this.
+
+
+So it's not as big as the other ones.
+
+
+So like I said, this only scans, it just updates the images whenever we get a new list.
+
+
+This is pre, so there will be a branch called as November release also.
+
+
+But I recently update updated the images.
+
+
+You can see yesterday I updated it to  just to scan these images.
+
+
+So we just update this file and and that's it and create a pull request and it runs the workflow.
+
+
+That's it.
+
+
+We don't even have to merge the the pull request because the pull request itself scans all the images.
+
+
+It creates A consolidated file and that's good enough for us.
+
+
+I mean, if the image doesn't have any vulnerability and if you want to use that version, of course we can merge it.
+
+
+But majority of the time the request is OK.
+
+
+There is a new release, you know, out today.
+
+
+Can you just scan that release to see if there is any vulnerability?
+
+
+So this is what we mostly do.
+
+
+Got it.
+
+
+OK.
+
+
+Any, any questions, anything?
+
+
+No, as of now, no, because I'm getting a clarity.
+
+
+But as I said, let me go through or watch the recording once again and then we'll come up with the questions because it looks nice to me.
+
+
+As of now, I'm getting the clarity and about environment and infrastructure, how you are doing and how we are doing everything.
+
+
+I'm getting very good clarity.
+
+
+But again, once I'll start it with my handsome, then definitely the question arise.
+
+
+No, no, of course, of course, no, that's true.
+
+
+But I think that's why I initially asked for, you know, recording this session because I know maybe it sounds straightforward when someone explains.
+
+
+But of course there are I think too many things I probably explained.
+
+
+So, you know, it's so maybe it's hard to follow later on how things were in in that order.
+
+
+So probably hope this this recording helps you.
+
+
+Yeah.
+
+
+So maybe just go through it once or maybe -, three times at least it because I think this what we have just discussed is the foundation of this use case.
+
+
+We haven't gone into any technical detail as such like how Terraform is set up, how EKS is spinned.
+
+
+We have just gone through the very basic foundations where each thing is there, how the repos are, what is the architecture.
+
+
+So once you are OK with this, you feel confident probably we can touch base on more things like how do we access the environment?
+
+
+How do we validate things where where our things are kept?
+
+
+Yeah, So I can explain those bits.
+
+
+I will also add you in our dailies.
+
+
+I will ask and Grace and also introduce you to our other members of the team.
+
+
+Sure, I'll do that.
+
+
+And who's leading this?
+
+
+I'm in here from CDF.
+
+
+Yes, I'm leading this on the business side.
+
+
+It's I think Stuart and Kanti and and yeah, we haven't got a lot of big team.
+
+
+So probably so it's myself.
+
+
+You now can't take grace toward  people in total.
+
+
+And then of course the strategy team helping a little bit.
+
+
+So definitely I mean we do have a monitoring setup for our cluster also still that is read to be placed because I haven't seen regarding the monitoring in the repos or in the files.
+
+
+Yeah, see we don't set any addition we any separate monitoring as such though like I said in the add-ons we have one add on add on called as Dynatrace.
+
+
+And once you have that add on installed on top of your EKS cluster, it does all the monitoring for you.
+
+
+So we have a Dynatrace UI, probably I'll show you next time, the Dynatrace.
+
+
+That means the agent of Dynatrace is installed on the EKS and that agent is sending all the stats about your cluster, whether it's a node level or pod level to Dynatrace.
+
+
+And then we have a Dynatrace UI where we can visualise all this.
+
+
+So we can set up our dashboard, set up monitoring and alerts on top of it.
+
+
+Earlier we used to do some on Cloud Watch, but Dynatrace is a standard monitoring tool in Santander.
+
+
+So we just have to do it.
+
+
+And I think it, it simplifies quite a lot of things because now we don't have to set up anything custom.
+
+
+We just have to install the agent and agent.
+
+
+That's majority of the things.
+
+
+I guess you're talking about the, I mean, do we have a one agent or for Dynatrist one agent?
+
+
+Dynatrist one agent?
+
+
+Yes, it's the name.
+
+
+Yeah, it is the name of the Dynatrist one agent.
+
+
+Yeah, Yeah.
+
+
+Got it.
+
+
+Yeah.
+
+
+And So what sort of what sort of work are we performing on the cluster side that we will discuss tomorrow?
+
+
+I'm not in her.
+
+
+Not an issue.
+
+
+Yeah.
+
+
+So to answer your question in a short way, see at the moment I'm kind of helping on both areas.
+
+
+So infrastructure of course, but also on the data side of things.
+
+
+See infrastructure wise I think we are we are all sorted.
+
+
+I don't think there is any dependency from the infrastructure point of view.
+
+
+We are currently in discovery environment.
+
+
+We once business team is happy, they give us a go ahead, we will create next to environment as well.
+
+
+And they are all automated.
+
+
+So from infra everything has been completed.
+
+
+Of course there are a few bits and bobs that we still need to work on and probably I'll, I'll explain you some of them.
+
+
+So maybe because I'm away from next Thursday until th of January and I think that's also one thing.
+
+
+Maybe that will give you more exposure, maybe not as much because I'll be away, but I think at least you'll be on your own.
+
+
+So you'll be, you know, able to explore everything yourself and and of course be able to, you know, deliver something in in my absence.
+
+
+But of course there that is the main agenda to grab the thing as soon as possible before you leave or before you go on a leave.
+
+
+So maybe what is the reach?
+
+
+I mean, to be very honest, I'll ask you like in your absence, like since it's a holiday week, how do you think how often we'll get the request or how often we will get the work request?
+
+
+I'm just stopping the recording.
+
+
+I think this that's probably not to be No, I need to be recorded, right?
+
+
+Agreed, agreed, agreed.
+
+
+Now Abhi training, go on.
+
+
+You know, our training has been.
+
+
